@@ -1,11 +1,14 @@
 package com.example.firebasedemoapp.util;
 
+import static com.example.firebasedemoapp.util.Constants.SHARED_PREF_USER;
+import static com.example.firebasedemoapp.util.Constants.USER_FIREBASE_CLOUD_MESSAGE_TOKEN;
+import static com.example.firebasedemoapp.util.Constants.USER_FOREGROUND_SERVICE;
+
 import android.content.Context;
 import android.content.SharedPreferences;
 
 public class SharedPrefManager {
-    public static final String SHARED_PREF_USER = "APP_USER";
-    public static final String USER_FIREBASE_CLOUD_MESSAGE_TOKEN = "user_firebase_token";
+
     SharedPreferences userPref;
     SharedPreferences.Editor editorUser;
     private Context _context;
@@ -27,6 +30,15 @@ public class SharedPrefManager {
 
     public void setUserFirebaseToken(String token) {
         editorUser.putString(USER_FIREBASE_CLOUD_MESSAGE_TOKEN, token);
+        editorUser.commit();
+    }
+
+    public boolean isForegroundServiceRunning(){
+        return userPref.getBoolean(USER_FOREGROUND_SERVICE, DEFAULT_VALUE_BOOLEAN);
+    }
+
+    public void setForegroundServiceRunning(boolean isRunning){
+        editorUser.putBoolean(USER_FOREGROUND_SERVICE,isRunning);
         editorUser.commit();
     }
 }

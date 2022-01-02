@@ -60,26 +60,15 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                 case "1":
                     Log.i(TAG, "handleDataMessage : called");
 
-//                    NotificationChannel channel =
-//                            new NotificationChannel(
-//                                    "CALL_PHONE", "FIREBASE_DEMO_APP",
-//                                    NotificationManager.IMPORTANCE_HIGH
-//                            );
-//                    channel.enableLights(true);
-//                    channel.enableVibration(true);
-//                    channel.setLightColor(Color.GREEN);
-//                    channel.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
-//
-//                    NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this, "CALL")
-//                            .setSmallIcon(R.drawable.ic_launcher_foreground)
-//                            .setContentTitle(name)
-//                            .setContentText(phone)
-//                            .setAutoCancel(true);
-//
-//                    NotificationManager notificationManager =
-//                            (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-//                    notificationManager.createNotificationChannel(channel);
-//                    notificationManager.notify(0, notificationBuilder.build());
+
+                    NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this, Constants.CHANNEL_ID)
+                            .setSmallIcon(R.drawable.ic_launcher_foreground)
+                            .setContentTitle(name)
+                            .setContentText(phone);
+
+                    NotificationManager notificationManager =
+                            (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+                    notificationManager.notify(2, notificationBuilder.build());
 
 
                     Intent intent = new Intent(this, CallScreenReceiver.class);

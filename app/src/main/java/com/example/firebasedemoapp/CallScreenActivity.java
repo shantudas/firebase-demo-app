@@ -9,6 +9,8 @@ import android.os.Handler;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.ImageButton;
 
 import androidx.annotation.RequiresApi;
@@ -26,6 +28,7 @@ public class CallScreenActivity extends AppCompatActivity implements View.OnClic
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_call_screen);
 
+
         init();
 
         vibratePhone(15000);
@@ -33,6 +36,12 @@ public class CallScreenActivity extends AppCompatActivity implements View.OnClic
         playSound();
 
         closeActivity(15000);
+
+        Window window = getWindow();
+        window.addFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED |
+                WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON |
+                WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON
+        );
     }
 
     private void closeActivity(long milliSeconds) {
@@ -48,6 +57,7 @@ public class CallScreenActivity extends AppCompatActivity implements View.OnClic
     private void playSound() {
         mp.start();
     }
+
     private void stopSound() {
         mp.stop();
     }
@@ -69,12 +79,14 @@ public class CallScreenActivity extends AppCompatActivity implements View.OnClic
     }
 
     private void init() {
-         mp = MediaPlayer.create(this, R.raw.mi_ringtone);
-         v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+        mp = MediaPlayer.create(this, R.raw.mi_ringtone);
+        v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
         btnHandleRejectCall = findViewById(R.id.btnHandleRejectCall);
         btnHandleRejectCall.setOnClickListener(this);
         btnHandleAcceptCall = findViewById(R.id.btnHandleAcceptCall);
         btnHandleAcceptCall.setOnClickListener(this);
+
+
     }
 
     @Override
@@ -93,7 +105,6 @@ public class CallScreenActivity extends AppCompatActivity implements View.OnClic
         stopSound();
         stopVibrate();
         finish();
-        System.exit(0);
     }
 
     private void acceptCall() {
@@ -107,7 +118,9 @@ public class CallScreenActivity extends AppCompatActivity implements View.OnClic
     @Override
     protected void onPause() {
         super.onPause();
+        if(this.isFinishing()){
         stopSound();
         stopVibrate();
+        }
     }
 }

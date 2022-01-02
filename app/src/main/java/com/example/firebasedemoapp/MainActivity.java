@@ -1,22 +1,16 @@
 package com.example.firebasedemoapp;
 
-import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
-
-import androidx.activity.result.ActivityResult;
-import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 
-import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.content.BroadcastReceiver;
 import android.content.ClipData;
 import android.content.ClipboardManager;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
@@ -25,15 +19,17 @@ import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.firebasedemoapp.services.ForegroundService;
 import com.example.firebasedemoapp.util.SharedPrefManager;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.messaging.FirebaseMessaging;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
     private static final String TAG = MainActivity.class.getSimpleName();
     public final static int SYSTEM_OVERLAY_PERMISSION_REQUEST_CODE = 101;
@@ -45,14 +41,19 @@ public class MainActivity extends AppCompatActivity {
      * */
 
     SharedPrefManager sharedPrefManager;
+    private Button btnHandleForegroundService;
+    private TextView tvForegroundServiceState;
 
-    @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        sharedPrefManager = new SharedPrefManager(MainActivity.this);
+        init();
+
+        setForegroundServiceState();
+
+
         TextView tvFirebaseToken= findViewById(R.id.tvFirebaseToken);
         String token="";
 
@@ -73,6 +74,23 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(MainActivity.this, "copied", Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    private void setForegroundServiceState() {
+        if (isServiceRunning()){
+            tvForegroundServiceState.setText("Foreground Service Running");
+            btnHandleForegroundService.setText("Stop Service");
+        }else {
+            tvForegroundServiceState.setText("Foreground Service Closed");
+            btnHandleForegroundService.setText("Start Service");
+        }
+    }
+
+    private void init(){
+        sharedPrefManager = new SharedPrefManager(MainActivity.this);
+        tvForegroundServiceState=findViewById(R.id.tvForegroundServiceState);
+        btnHandleForegroundService=findViewById(R.id.btnHandleForegroundService);
+        btnHandleForegroundService.setOnClickListener(this);
     }
 
 
@@ -164,4 +182,39 @@ public class MainActivity extends AppCompatActivity {
                     Log.i(TAG, "RESULT OK");
                 }
             });
+
+    private void stopForegroundService() {
+        Intent serviceIntent = new Intent(this, ForegroundService.class);
+        stopService(serviceIntent);
+
+        sharedPrefManager.setForegroundServiceRunning(false);
+        setForegroundServiceState();
+    }
+
+    private void startForegroundService() {
+        Intent serviceIntent = new Intent(this, ForegroundService.class);
+        serviceIntent.putExtra("inputExtraTitle", "Firebase Demo App");
+        serviceIntent.putExtra("inputExtraBody", "Foreground Service Example in Android");
+        ContextCompat.startForegroundService(this, serviceIntent);
+
+        sharedPrefManager.setForegroundServiceRunning(true);
+        setForegroundServiceState();
+    }
+
+    private boolean isServiceRunning(){
+        boolean isRunning=sharedPrefManager.isForegroundServiceRunning();
+        Log.i(TAG, String.valueOf(isRunning));
+        return isRunning;
+    }
+
+    @Override
+    public void onClick(View v) {
+        if (v.getId()==R.id.btnHandleForegroundService){
+            if (isServiceRunning()){ //running
+                stopForegroundService();
+            }else {
+                startForegroundService();
+            }
+        }
+    }
 }
