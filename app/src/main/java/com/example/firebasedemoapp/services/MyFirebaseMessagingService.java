@@ -1,23 +1,20 @@
-package com.example.firebasedemoapp.util;
+package com.example.firebasedemoapp.services;
 
-import android.app.AlarmManager;
-import android.app.Notification;
-import android.app.NotificationChannel;
+import static com.example.firebasedemoapp.util.Constants.TYPE_FCM_CALL;
+import static com.example.firebasedemoapp.util.Constants.TYPE_FCM_GENERAL;
+
 import android.app.NotificationManager;
-import android.app.PendingIntent;
-import android.app.TaskStackBuilder;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Color;
+import android.os.Build;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.core.app.NotificationCompat;
-import androidx.core.app.NotificationManagerCompat;
 
-import com.example.firebasedemoapp.CallScreenActivity;
-import com.example.firebasedemoapp.MainActivity;
 import com.example.firebasedemoapp.R;
+import com.example.firebasedemoapp.util.CallScreenReceiver;
+import com.example.firebasedemoapp.util.Constants;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 
@@ -51,30 +48,43 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
     private void handleDataMessage(JSONObject json) {
         try {
-            String type = json.getString("type");
+            int type = json.getInt("type");
             String name = json.getString("customer_name");
             String phone = json.getString("customer_phone");
             Log.d(TAG, " handleDataMessage :: " + type + "\n" + name + json.getString("customer_phone"));
 
             switch (type) {
-                case "1":
-                    Log.i(TAG, "handleDataMessage : called");
+                case TYPE_FCM_CALL:
+                    Log.d(TAG, " TYPE_FCM_CALL : called");
+
+                    Intent intent = new Intent(getApplicationContext(), ForegroundService.class);
+                    intent.putExtra(Constants.Intent.INTENT_FROM_SERVICE_CALLER_NAME,name);
+                    intent.putExtra(Constants.Intent.INTENT_FROM_SERVICE_CALLER_CONTACT_NUMBER,phone);
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                        startForegroundService(intent);
+                    } else {
+                        startService(intent);
+                    }
 
 
-                    NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this, Constants.CHANNEL_ID)
-                            .setSmallIcon(R.drawable.ic_launcher_foreground)
-                            .setContentTitle(name)
-                            .setContentText(phone);
+//                    NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this, Constants.CHANNEL_ID)
+//                            .setSmallIcon(R.drawable.ic_launcher_foreground)
+//                            .setContentTitle(name)
+//                            .setContentText(phone);
+//
+//                    NotificationManager notificationManager =
+//                            (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+//                    notificationManager.notify(2, notificationBuilder.build());
+//
+//
+//                    Intent intent = new Intent(this, CallScreenReceiver.class);
+//                    intent.setAction("com.example.callScreen");
+//                    sendBroadcast(intent);
 
-                    NotificationManager notificationManager =
-                            (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-                    notificationManager.notify(2, notificationBuilder.build());
+                    break;
 
-
-                    Intent intent = new Intent(this, CallScreenReceiver.class);
-                    intent.setAction("com.example.callScreen");
-                    sendBroadcast(intent);
-
+                case TYPE_FCM_GENERAL:
+                    Log.d(TAG, " TYPE_FCM_GENERAL : called");
                     break;
             }
 
