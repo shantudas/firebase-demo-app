@@ -37,6 +37,12 @@ public class CallScreenActivity extends AppCompatActivity implements View.OnClic
 
         closeActivity(15000);
 
+        setFlags();
+
+
+    }
+
+    private void setFlags() {
         Window window = getWindow();
         window.addFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED |
                 WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON |
@@ -47,11 +53,7 @@ public class CallScreenActivity extends AppCompatActivity implements View.OnClic
     private void closeActivity(long milliSeconds) {
         Handler handler = new Handler();
 
-        handler.postDelayed(new Runnable() {
-            public void run() {
-                finish();
-            }
-        }, milliSeconds);
+        handler.postDelayed(() -> finish(), milliSeconds);
     }
 
     private void playSound() {

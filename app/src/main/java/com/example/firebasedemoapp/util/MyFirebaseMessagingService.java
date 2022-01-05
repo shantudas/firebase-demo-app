@@ -24,6 +24,8 @@ import com.google.firebase.messaging.RemoteMessage;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.concurrent.ExecutionException;
+
 public class MyFirebaseMessagingService extends FirebaseMessagingService {
     private static final String TAG = MyFirebaseMessagingService.class.getSimpleName();
 
@@ -60,6 +62,18 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                 case "1":
                     Log.i(TAG, "handleDataMessage : called");
 
+                    try {
+                        boolean foreground = new ForegroundCheckTask().execute(getApplicationContext()).get();
+                        if (foreground) {
+                            startCallScreenUsingBroadCastReceiver();
+                        } else {
+                            startCallScreen(name, phone);
+                        }
+                    } catch (ExecutionException | InterruptedException e) {
+                        e.printStackTrace();
+                    }
+
+
 
                     NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this, Constants.CHANNEL_ID)
                             .setSmallIcon(R.drawable.ic_launcher_foreground)
@@ -71,16 +85,34 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                     notificationManager.notify(2, notificationBuilder.build());
 
 
-                    Intent intent = new Intent(this, CallScreenReceiver.class);
-                    intent.setAction("com.example.callScreen");
-                    sendBroadcast(intent);
-
                     break;
             }
 
         } catch (JSONException e) {
             e.printStackTrace();
         }
+    }
+
+    /*
+     *  You can start your activity by calling ‘startActivity(intent)’ method in onMessageReceived method.
+     *  This case will work in every Android OS. You can simply start activity by sending a broadcast from
+     *  firebase service and open activity on receiving that broadcast.
+     * */
+    private void startCallScreenUsingBroadCastReceiver() {
+        Intent intent = new Intent(this, CallScreenReceiver.class);
+        intent.setAction("com.example.callScreen");
+        sendBroadcast(intent);
+    }
+
+    /*
+    * You can start your activity by simply calling ‘startActivity(intent)’ method in onMessageReceived method.
+    *  Make sure you have set priority to high for this type of notifications.
+    * Simply send a broadcast from firebase service and open activity on receiving broadcast.
+    * Note: works fine in API level < 29 (Android 10)
+    * */
+    private void startCallScreen(String name, String phone) {
+        Intent intent = new Intent(getApplicationContext(), CallScreenActivity.class);
+        startActivity(intent);
     }
 
     @Override
