@@ -8,18 +8,29 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
+import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ImageButton;
+import android.widget.TextView;
 
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.firebasedemoapp.util.Constants;
+
 public class CallScreenActivity extends AppCompatActivity implements View.OnClickListener {
+    private static final String TAG=CallScreenActivity.class.getSimpleName();
+
     private ImageButton btnHandleRejectCall, btnHandleAcceptCall;
+    private TextView tvCallerName,tvCallerContactNumber;
     private MediaPlayer mp;
     private Vibrator v;
+
+
+    private String callerName;
+    private String callerContactNumber;
 
 
     @RequiresApi(api = Build.VERSION_CODES.M)
@@ -28,8 +39,9 @@ public class CallScreenActivity extends AppCompatActivity implements View.OnClic
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_call_screen);
 
-
         init();
+
+        initIntent();
 
         vibratePhone(15000);
 
@@ -42,6 +54,19 @@ public class CallScreenActivity extends AppCompatActivity implements View.OnClic
                 WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON |
                 WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON
         );
+
+        setData();
+    }
+
+    private void setData() {
+        tvCallerName.setText(callerName);
+        tvCallerContactNumber.setText(callerContactNumber);
+    }
+
+    private void initIntent(){
+        callerName=getIntent().getStringExtra(Constants.Intent.INTENT_FROM_SERVICE_CALLER_NAME);
+        callerContactNumber=getIntent().getStringExtra(Constants.Intent.INTENT_FROM_SERVICE_CALLER_CONTACT_NUMBER);
+        Log.d(TAG, " initIntent :: "+callerName+", "+callerContactNumber);
     }
 
     private void closeActivity(long milliSeconds) {
@@ -81,6 +106,12 @@ public class CallScreenActivity extends AppCompatActivity implements View.OnClic
     private void init() {
         mp = MediaPlayer.create(this, R.raw.mi_ringtone);
         v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+
+
+        tvCallerName = findViewById(R.id.tvCallerName);
+        tvCallerContactNumber = findViewById(R.id.tvCallerContactNumber);
+
+
         btnHandleRejectCall = findViewById(R.id.btnHandleRejectCall);
         btnHandleRejectCall.setOnClickListener(this);
         btnHandleAcceptCall = findViewById(R.id.btnHandleAcceptCall);

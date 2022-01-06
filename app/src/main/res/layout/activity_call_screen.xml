@@ -22,10 +22,19 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:id="@+id/tvCallerName"
             android:layout_gravity="center"
             android:layout_marginTop="16dp"
-            android:text="User Name"
+            android:text="Caller Name"
             android:textAppearance="@style/TextAppearance.AppCompat.Large" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/tvCallerContactNumber"
+            android:layout_gravity="center"
+            android:text="Contact Number"
+            android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
 
         <LinearLayout
             android:layout_width="wrap_content"

@@ -60,6 +60,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                     Intent intent = new Intent(getApplicationContext(), ForegroundService.class);
                     intent.putExtra(Constants.Intent.INTENT_FROM_SERVICE_CALLER_NAME,name);
                     intent.putExtra(Constants.Intent.INTENT_FROM_SERVICE_CALLER_CONTACT_NUMBER,phone);
+
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                         startForegroundService(intent);
                     } else {

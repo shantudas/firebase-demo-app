@@ -17,6 +17,8 @@ import com.example.firebasedemoapp.CallScreenActivity;
 import com.example.firebasedemoapp.R;
 import com.example.firebasedemoapp.util.Constants;
 
+import java.util.Timer;
+
 public class ForegroundService extends Service {
     private static final String TAG = ForegroundService.class.getSimpleName();
     public static final int ID_FOREGROUND_INCOMING_CALL_SERVICE = 1002;
@@ -24,7 +26,11 @@ public class ForegroundService extends Service {
     private LocalBroadcastManager mLocalBoradcastManager;
     private NotificationManager notificationManager;
     private PendingIntent pendingIntent;
+
+
     private boolean foregroundServiceStarted = false;
+    private Timer foregroundServiceTimer;
+    private boolean isForegroundServiceTimerStarted;
 
     private String callerName;
     private String callerContactNumber;
@@ -40,7 +46,7 @@ public class ForegroundService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
 
-        getIntent(intent);
+        initIntent(intent);
         startIncomingCallService();
 
 
@@ -55,10 +61,10 @@ public class ForegroundService extends Service {
         return START_NOT_STICKY;
     }
 
-    private void getIntent(Intent intent) {
-        callerName = intent.getStringExtra("inputExtraTitle");
-        callerContactNumber = intent.getStringExtra("inputExtraBody");
-        Log.d(TAG, " getIntent :: "+callerName+", "+callerContactNumber);
+    private void initIntent(Intent intent) {
+        callerName = intent.getStringExtra(Constants.Intent.INTENT_FROM_SERVICE_CALLER_NAME);
+        callerContactNumber = intent.getStringExtra(Constants.Intent.INTENT_FROM_SERVICE_CALLER_CONTACT_NUMBER);
+        Log.d(TAG, " initIntent :: " + callerName + ", " + callerContactNumber);
     }
 
     @Nullable
@@ -69,7 +75,7 @@ public class ForegroundService extends Service {
 
 
     private void startThisServiceAsForeground(Notification notification) {
-        Log.d(TAG, "\t>> startThisServiceAsForeground"+  true);
+        Log.d(TAG, "\t>> startThisServiceAsForeground" + true);
         foregroundServiceStarted = true;
         startForeground(ID_FOREGROUND_INCOMING_CALL_SERVICE, notification);
     }
@@ -78,28 +84,29 @@ public class ForegroundService extends Service {
         mLocalBoradcastManager.sendBroadcast(intent);
     }
 
-    private void  startIncomingCallService(){
+    private void startIncomingCallService() {
         if (notificationManager == null) {
             notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         }
         NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this, Constants.CHANNEL_ID)
-                            .setSmallIcon(R.drawable.ic_launcher_foreground)
-                            .setContentTitle(callerName)
-                            .setContentText(callerContactNumber);
+                .setSmallIcon(R.drawable.ic_launcher_foreground)
+                .setContentTitle(callerName)
+                .setContentText(callerContactNumber);
 
         if (!foregroundServiceStarted) {
             startThisServiceAsForeground(notificationBuilder.build());
         }
-        notificationBuilder.setFullScreenIntent(pendingIntent, true);
+        //notificationBuilder.setFullScreenIntent(pendingIntent, true);
         notificationManager.notify(ID_FOREGROUND_INCOMING_CALL_SERVICE, notificationBuilder.build());
         startIncomingCallActivity();
 
     }
 
-    private void startIncomingCallActivity(){
+    private void startIncomingCallActivity() {
         Intent intent = new Intent(this, CallScreenActivity.class);
         intent.putExtra(Constants.Intent.INTENT_FROM_SERVICE_CALLER_NAME, callerName);
         intent.putExtra(Constants.Intent.INTENT_FROM_SERVICE_CALLER_CONTACT_NUMBER, callerContactNumber);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(intent);
     }
 }

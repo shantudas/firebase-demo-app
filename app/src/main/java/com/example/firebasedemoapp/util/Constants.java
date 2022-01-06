@@ -12,8 +12,8 @@ public class Constants {
 
 
     //type
-    public static final int TYPE_FCM_GENERAL = 1;
-    public static final int TYPE_FCM_CALL = 2;
+    public static final int TYPE_FCM_GENERAL = 2;
+    public static final int TYPE_FCM_CALL = 1;
 
 
     public class Intent{
