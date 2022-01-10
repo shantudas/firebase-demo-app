@@ -18,8 +18,8 @@ import androidx.appcompat.app.AppCompatActivity;
 
 public class CallScreenActivity extends AppCompatActivity implements View.OnClickListener {
     private ImageButton btnHandleRejectCall, btnHandleAcceptCall;
-    private MediaPlayer mp;
-    private Vibrator v;
+/*    private MediaPlayer mp;
+    private Vibrator v;*/
 
 
     @RequiresApi(api = Build.VERSION_CODES.M)
@@ -31,15 +31,12 @@ public class CallScreenActivity extends AppCompatActivity implements View.OnClic
 
         init();
 
-        vibratePhone(15000);
-
-        playSound();
+//        vibratePhone(15000);
+//
+//        playSound();
 
         closeActivity(15000);
-
         setFlags();
-
-
     }
 
     private void setFlags() {
@@ -56,7 +53,7 @@ public class CallScreenActivity extends AppCompatActivity implements View.OnClic
         handler.postDelayed(() -> finish(), milliSeconds);
     }
 
-    private void playSound() {
+    /*private void playSound() {
         mp.start();
     }
 
@@ -78,11 +75,11 @@ public class CallScreenActivity extends AppCompatActivity implements View.OnClic
             //deprecated in API 26
             v.vibrate(milliSeconds);
         }
-    }
+    }*/
 
     private void init() {
-        mp = MediaPlayer.create(this, R.raw.mi_ringtone);
-        v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+     /*   mp = MediaPlayer.create(this, R.raw.mi_ringtone);
+        v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);*/
         btnHandleRejectCall = findViewById(R.id.btnHandleRejectCall);
         btnHandleRejectCall.setOnClickListener(this);
         btnHandleAcceptCall = findViewById(R.id.btnHandleAcceptCall);
@@ -104,14 +101,14 @@ public class CallScreenActivity extends AppCompatActivity implements View.OnClic
     }
 
     private void rejectCall() {
-        stopSound();
-        stopVibrate();
+     /*   stopSound();
+        stopVibrate();*/
         finish();
     }
 
     private void acceptCall() {
-        stopSound();
-        stopVibrate();
+    /*    stopSound();
+        stopVibrate();*/
         Intent intent = new Intent(this, MainActivity.class);
         startActivity(intent);
         finish();
@@ -121,8 +118,8 @@ public class CallScreenActivity extends AppCompatActivity implements View.OnClic
     protected void onPause() {
         super.onPause();
         if(this.isFinishing()){
-        stopSound();
-        stopVibrate();
+  /*      stopSound();
+        stopVibrate();*/
         }
     }
 }

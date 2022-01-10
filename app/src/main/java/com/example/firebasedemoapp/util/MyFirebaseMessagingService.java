@@ -23,6 +23,7 @@ import androidx.core.app.NotificationManagerCompat;
 import com.example.firebasedemoapp.CallScreenActivity;
 import com.example.firebasedemoapp.MainActivity;
 import com.example.firebasedemoapp.R;
+import com.example.firebasedemoapp.services.IncomingCallService;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 
@@ -33,6 +34,7 @@ import java.util.concurrent.ExecutionException;
 
 public class MyFirebaseMessagingService extends FirebaseMessagingService {
     private static final String TAG = MyFirebaseMessagingService.class.getSimpleName();
+    private static final int NOTIFICATION_ID = 2;
 
     @Override
     public void onMessageReceived(@NonNull RemoteMessage remoteMessage) {
@@ -66,29 +68,30 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
             switch (type) {
                 case "1":
                     Log.i(TAG, "handleDataMessage : called");
-
                     try {
                         boolean foreground = new ForegroundCheckTask().execute(getApplicationContext()).get();
                         if (foreground) {
                             Log.i(TAG, "ForegroundCheckTask : foreground");
-                            startCallScreenUsingBroadCastReceiver();
-
+                            //startCallScreenUsingBroadCastReceiver();
+                            startIncomingCallService();
                         } else {
                             Log.i(TAG, "ForegroundCheckTask : Background");
                             startCallScreen(name, phone);
-
                         }
                     } catch (ExecutionException | InterruptedException e) {
                         e.printStackTrace();
                     }
-
-
                     break;
             }
-
         } catch (JSONException e) {
             e.printStackTrace();
         }
+    }
+
+    private void startIncomingCallService() {
+        Intent intent = new Intent(getApplicationContext(), IncomingCallService.class);
+        intent.setAction(IncomingCallService.ACTION_START_INCOMING_CALL);
+       sendBroadcast(intent);
     }
 
 
@@ -101,8 +104,9 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
      *
      * */
     private void startCallScreenUsingBroadCastReceiver() {
-        Intent intent = new Intent(this, CallScreenReceiver.class);
-        intent.setAction("com.example.callScreen");
+        Intent intent = new Intent(this, IncomingCallService.class);
+//        intent.setAction("com.example.callScreen");
+        intent.setAction(IncomingCallService.ACTION_START_INCOMING_CALL);
         sendBroadcast(intent);
     }
 
@@ -130,30 +134,62 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         }
 
 
-        MediaPlayer mp = MediaPlayer.create(getApplicationContext(), R.raw.mi_ringtone);
-        mp.start();
+//        MediaPlayer mp = MediaPlayer.create(getApplicationContext(), R.raw.mi_ringtone);
+//        mp.start();
     }
 
     private void createNotification(String name, String phone) {
         Log.i(TAG, "createNotification called");
 
 
-        Intent intent = new Intent(getApplicationContext(), MainActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        PendingIntent pendIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        Intent intent = new Intent(getApplicationContext(), CallScreenActivity.class);
+//        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+//        PendingIntent pendIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        PendingIntent pendIntent = PendingIntent.getActivity(this, 0, intent, 0);
 
         NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this, Constants.CHANNEL_ID)
                 .setSmallIcon(R.drawable.ic_launcher_foreground)
                 .setContentTitle(name)
                 .setContentText(phone);
 
-        notificationBuilder.setAutoCancel(true);
-        notificationBuilder.setOngoing(true);
+        notificationBuilder.setTimeoutAfter(15000);
+
+//        notificationBuilder.setAutoCancel(true);
+//        notificationBuilder.setOngoing(true);
         notificationBuilder.setPriority(NotificationCompat.PRIORITY_HIGH);
         notificationBuilder.setCategory(Notification.CATEGORY_CALL);
         notificationBuilder.setFullScreenIntent(pendIntent, true); // notification shows heads up until click
 
         notificationBuilder.setVibrate(new long[]{500, 500, 500, 500, 500, 500, 500, 500, 500, 500, 500, 500, 500, 500});
+
+
+
+       /* Intent intentForAccept = new Intent(getApplicationContext(), MainActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        PendingIntent pendIntentAccept = PendingIntent.getActivity(this, 0, intentForAccept, 0);*/
+
+
+        //accept
+        Intent acceptIntent = new Intent(getBaseContext(), IncomingCallService.class);
+        acceptIntent.setAction(IncomingCallService.ACTION_ACCEPT_INCOMING_CALL);
+        acceptIntent.putExtra("notificationId", NOTIFICATION_ID);
+        PendingIntent acceptPendingIntent = PendingIntent.getBroadcast(getBaseContext(), 0, acceptIntent, 0);
+
+
+
+        //button
+        Intent dismissIntent = new Intent(getBaseContext(), IncomingCallService.class);
+        dismissIntent.setAction(IncomingCallService.ACTION_STOP_INCOMING_CALL);
+        dismissIntent.putExtra("notificationId", NOTIFICATION_ID);
+        PendingIntent dismissPendingIntent = PendingIntent.getBroadcast(getBaseContext(), 0, dismissIntent, 0);
+
+        notificationBuilder.setContentIntent(pendIntent);
+        notificationBuilder.addAction(android.R.drawable.ic_delete, "DISMISS", dismissPendingIntent);
+        notificationBuilder.addAction(android.R.drawable.ic_menu_view, "ACCEPT", acceptPendingIntent);
+
+
+
 
         //notification manager
         NotificationManager notificationManager =
@@ -165,9 +201,6 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
     public void onNewToken(@NonNull String s) {
         super.onNewToken(s);
         //todo :: store firebase token somewhere
-        Log.d(TAG, " onNewToken :: " + " called c1vin0y2SueddRKSrU9IjF:APA91bGJiigOKbjzAU-XT5NhOPTzva5mFZKgO1zGDVILDmuM668JvdibewOlSpC9_FaVKJeZKkEFagjyjOKcOef8s4u2HpTp-jEMOQNojdKSOcIxaMDdqLlhSuGG1y0wW5ug5sF0hN-a");
         Log.d(TAG, " onNewToken :: " + s);
-
-
     }
 }
