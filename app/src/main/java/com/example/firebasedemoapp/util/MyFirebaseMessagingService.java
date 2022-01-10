@@ -145,28 +145,15 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this, Constants.CHANNEL_ID)
                 .setSmallIcon(R.drawable.ic_launcher_foreground)
                 .setContentTitle(name)
-                .setContentText(phone)
-                .setPriority(NotificationCompat.PRIORITY_HIGH);
+                .setContentText(phone);
 
+        notificationBuilder.setAutoCancel(true);
         notificationBuilder.setOngoing(true);
+        notificationBuilder.setPriority(NotificationCompat.PRIORITY_HIGH);
         notificationBuilder.setCategory(Notification.CATEGORY_CALL);
         notificationBuilder.setFullScreenIntent(pendIntent, true); // notification shows heads up until click
 
-
-
         notificationBuilder.setVibrate(new long[]{500, 500, 500, 500, 500, 500, 500, 500, 500, 500, 500, 500, 500, 500});
-
-//        notificationBuilder.setContentIntent(pendIntent);
-
-         /*notificationBuilder.setCategory(NotificationCompat.CATEGORY_CALL);
-       notificationBuilder.setContentIntent(pendIntent);
-        notificationBuilder.setSound(Uri.parse("android.resource://"+getPackageName()+"/raw/mi_ringtone"));
-        notificationBuilder.setVibrate(new long[]{500, 500, 500, 500, 500, 500, 500, 500, 500, 500, 500, 500, 500, 500});*/
-
-     /*   notificationBuilder.addAction(R.drawable.ic_baseline_call_end_24, "Reject");
-        notificationBuilder.addAction(R.drawable.ic_baseline_call_24, "Answer");*/
-
-
 
         //notification manager
         NotificationManager notificationManager =
