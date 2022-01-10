@@ -11,9 +11,11 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
+import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Build;
+import android.provider.Settings;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -91,7 +93,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
     private void startIncomingCallService() {
         Intent intent = new Intent(getApplicationContext(), IncomingCallService.class);
         intent.setAction(IncomingCallService.ACTION_START_INCOMING_CALL);
-       sendBroadcast(intent);
+        sendBroadcast(intent);
     }
 
 
@@ -134,12 +136,13 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         }
 
 
-//        MediaPlayer mp = MediaPlayer.create(getApplicationContext(), R.raw.mi_ringtone);
-//        mp.start();
     }
 
     private void createNotification(String name, String phone) {
         Log.i(TAG, "createNotification called");
+
+        MediaPlayer mp = MediaPlayer.create(getApplicationContext(), R.raw.mi_ringtone);
+        mp.start();
 
 
         Intent intent = new Intent(getApplicationContext(), CallScreenActivity.class);
@@ -177,7 +180,6 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         PendingIntent acceptPendingIntent = PendingIntent.getBroadcast(getBaseContext(), 0, acceptIntent, 0);
 
 
-
         //button
         Intent dismissIntent = new Intent(getBaseContext(), IncomingCallService.class);
         dismissIntent.setAction(IncomingCallService.ACTION_STOP_INCOMING_CALL);
@@ -187,8 +189,6 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         notificationBuilder.setContentIntent(pendIntent);
         notificationBuilder.addAction(android.R.drawable.ic_delete, "DISMISS", dismissPendingIntent);
         notificationBuilder.addAction(android.R.drawable.ic_menu_view, "ACCEPT", acceptPendingIntent);
-
-
 
 
         //notification manager
